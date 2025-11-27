@@ -1,0 +1,48 @@
+# Ignore Python venv
+venv/
+Backend/venv/
+*/venv/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment files
+.env
+
+# Ignore build artifacts
+build/
+dist/
+
+# Ignore databases / temp files
+*.sqlite3
+*.db
+chromadb/
+rag_db/
+*.bin
+
+# Ignore Node.js related
+node_modules/
+frontend/node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore OS junk
+.DS_Store
+Thumbs.db
+
+# Ignore IDE folders
+.vscode/
+.idea/
+
+# Ignore large model/data files
+*.dll
+*.pyd
+*.h5
+*.ckpt
+*.pt
+*.bin
+*.safetensors

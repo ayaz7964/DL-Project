@@ -1,29 +1,42 @@
+# uvicorn main:app --reload --port 8000
 from fastapi import FastAPI, UploadFile, File
-from rag.rag_answer import answer_query
-from rag.pipeline_ingest import ingest_all
-from rag.pdf_loader import extract_pdf
+from pydantic import BaseModel
+from rag.pipeline import add_pdf_to_db, generate_answer
 import os
 
 app = FastAPI()
 
-@app.get("/")
-def home():
-    return {"status": "SibaSol RAG Backend Running"}
+from fastapi.middleware.cors import CORSMiddleware
 
-@app.get("/ask")
-def ask(query: str):
-    return {"answer": answer_query(query)}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.post("/upload")
+UPLOAD_DIR = "send_files"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# --- NEW MODEL ---
+class QueryRequest(BaseModel):
+    query: str
+
+
+@app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
-    path = f"data/pdfs/{file.filename}"
-    with open(path, "wb") as f:
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    with open(file_path, "wb") as f:
         f.write(await file.read())
 
-    docs = extract_pdf(path)
-    return {"status": "PDF processed", "chunks": len(docs)}
+    add_pdf_to_db(file_path)
 
-@app.post("/ingest")
-def ingest():
-    ingest_all()
-    return {"status": "Ingestion Completed"}
+    return {"message": "PDF added to RAG database"}
+
+
+@app.post("/ask")
+async def ask_question(request: QueryRequest):
+    answer = generate_answer(request.query)
+    return {"answer": answer}

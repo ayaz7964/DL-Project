@@ -1,4 +1,5 @@
 import React, { useState, useLayoutEffect, useRef } from "react";
+import { askBackend } from "./api";
 
 // Helper function to render text with line breaks and clickable links
 function renderTextWithBreaks(text) {
@@ -157,36 +158,36 @@ export default function SibaChat() {
     }
   };
 
-  const send = () => {
-    const text = input.trim();
-    if (!text || isTyping) return; // Prevent sending while typing/processing
+ const send = async () => {
+  const text = input.trim();
+  if (!text || isTyping) return;
 
-    const userMsg = {
-      id: Date.now(),
-      role: "user",
-      text,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-
-    setMessages((m) => [...m, userMsg]);
-    setInput("");
-    if (taRef.current) {
-        taRef.current.style.height = "auto"; // Reset textarea height after sending
-    }
-    
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const botMsg = {
-        id: Date.now() + 1,
-        role: "assistant",
-        text: getReply(text),
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-      setMessages((m) => [...m, botMsg]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 500); // More professional, slightly varied delay
+  const userMsg = {
+    id: Date.now(),
+    role: "user",
+    text,
+    time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   };
+
+  setMessages((m) => [...m, userMsg]);
+  setInput("");
+  if (taRef.current) taRef.current.style.height = "auto";
+
+  setIsTyping(true);
+
+  // 🔥 Ask backend instead of local KB
+  const reply = await askBackend(text);
+
+  const botMsg = {
+    id: Date.now() + 1,
+    role: "assistant",
+    text: reply,
+    time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  };
+
+  setMessages((m) => [...m, botMsg]);
+  setIsTyping(false);
+};
 
   const handleKey = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {

@@ -1,8 +1,12 @@
-import chromadb
+# rag/chroma_db.py
 
-chroma = chromadb.Client()
+from chromadb import PersistentClient
 
-collection = chroma.get_or_create_collection(
-    name="university_knowledge",
+# Create a persistent ChromaDB client
+chroma_client = PersistentClient(path="chroma_storage")
+
+# Create or load the collection
+collection = chroma_client.get_or_create_collection(
+    name="documents",
     metadata={"hnsw:space": "cosine"}
 )

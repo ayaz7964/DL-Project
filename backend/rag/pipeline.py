@@ -1,33 +1,45 @@
-from .embeddings import embed
-from .chroma_db import chroma_client
-from .llm import generate_answer
+# rag/pipeline.py
 
-def answer_question(query):
-    # 1. Embed query
-    q_emb = embed(query)
+from .chroma_db import collection
+from sentence_transformers import SentenceTransformer
+from PyPDF2 import PdfReader
 
-    # 2. Search relevant docs
-    results = chroma_client.query(
-        query_embeddings=[q_emb],
-        n_results=5,
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+def add_pdf_to_db(file_path):
+    reader = PdfReader(file_path)
+    text = ""
+
+    for page in reader.pages:
+        text += page.extract_text() + "\n"
+
+    chunks = text.split("\n\n")
+    embeddings = model.encode(chunks).tolist()
+
+    ids = [f"doc_{i}" for i in range(len(chunks))]
+
+    collection.add(
+        ids=ids,
+        documents=chunks,
+        embeddings=embeddings
     )
 
-    context = ""
-    for chunk in results["documents"][0]:
-        context += chunk + "\n\n"
 
-    # 3. Build prompt
-    prompt = f"""
-    You are a university assistant.
-    Answer using the context below.
-    If you don't know, say you don't know.
+def generate_answer(query):
+    embedding = model.encode([query]).tolist()[0]
 
-    CONTEXT:
-    {context}
+    results = collection.query(
+        query_embeddings=[embedding],
+        n_results=3
+    )
 
-    QUESTION:
-    {query}
-    """
+    if not results["documents"]:
+        return "No relevant information found."
 
-    # 4. Generate answer
-    return generate_answer(prompt)
+    answer = ""
+
+    for doc_list in results["documents"]:
+        for doc in doc_list:
+            answer += doc + "\n"
+
+    return answer

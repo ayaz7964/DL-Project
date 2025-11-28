@@ -81,13 +81,16 @@ def build_prompt(question, contexts):
     """
     contexts: list[str] highest-scoring retrieved chunks
     """
-    ctx_text = "\n\n".join(contexts)
-    prompt = (
-        "You are SibaSol assistant. Use ONLY the provided CONTEXT to answer. "
-        "If the answer is not in the context, say 'I don't have that information'.\n\n"
-        f"CONTEXT:\n{ctx_text}\n\nQUESTION: {question}\nANSWER:"
+    numbered_ctx = "\n".join(f"{i+1}. {c}" for i, c in enumerate(contexts, start=1))
+    return (
+        "You are SibaSol assistant. Read the context snippets and craft a clear, helpful answer.\n"
+        "Guidelines:\n"
+        "- Synthesize across snippets; combine details instead of repeating them.\n"
+        "- Use the context to infer missing links when it is reasonable; make the reasoning explicit.\n"
+        "- Reply in natural language (2-6 sentences). Do not just quote the context.\n"
+        "- If key information is missing, say what is unknown instead of guessing.\n\n"
+        f"CONTEXT:\n{numbered_ctx}\n\nQUESTION: {question}\nANSWER:"
     )
-    return prompt
 
 def generate_answer(question, top_k=5):
     # 1) embed query
@@ -96,9 +99,12 @@ def generate_answer(question, top_k=5):
     res = collection.query(query_embeddings=[q_emb], n_results=top_k)
     # results structure: {'ids': [...], 'distances': [...], 'documents': [[...]]}
     docs = []
+    seen = set()
     for dlist in res.get("documents", []):
         for d in dlist:
-            docs.append(d)
+            if d not in seen:
+                docs.append(d)
+                seen.add(d)
     # If nothing retrieved, quick message
     if not docs:
         return "I don't have any information about that in the knowledge base."
@@ -107,10 +113,19 @@ def generate_answer(question, top_k=5):
     prompt = build_prompt(question, docs[:top_k])
 
     # 4) Generate
-    # max_length=300
-    out = generator(prompt, num_return_sequences=1)[0]["generated_text"]
-    # the generator returns the full text including prompt; trim if necessary.
-    # We can try to return only after 'ANSWER:' occurrence
-    if "ANSWER:" in out:
-        return out.split("ANSWER:")[-1].strip()
-    return out
+    gen_out = generator(
+        prompt,
+        num_return_sequences=1,
+        max_new_tokens=256,
+        temperature=0.35,
+        top_p=0.9,
+        do_sample=True,
+        return_full_text=False,
+    )[0]
+    answer = gen_out.get("generated_text", "").strip()
+    if not answer:
+        # fallback in case the pipeline still includes the prompt
+        raw = gen_out.get("generated_text", "") if isinstance(gen_out, dict) else str(gen_out)
+        if "ANSWER:" in raw:
+            return raw.split("ANSWER:")[-1].strip()
+    return answer

@@ -63,10 +63,14 @@
 
  # rag/pipeline.py
 import os
-from dotenv import load_dotenv
+from typing import List, Dict, Any
+import numpy as np
+from dotenv import load_dotenv   
 from openai import OpenAI
 from .chroma_db import collection
-from .embeddings import embed_text
+from .embeddings import embed_text, embed_texts
+from .scraper_web import scrape_page
+from .scraper_facebook import fetch_facebook_posts
 
 # Load env so OPENAI_API_KEY / OPENAI_MODEL are picked up
 load_dotenv()
@@ -80,15 +84,57 @@ if not OPENAI_API_KEY:
 
 client = OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL)
 
-def build_prompt(question, contexts):
+# Live web/FB settings
+LIVE_WEB_URLS = [
+    u.strip()
+    for u in os.getenv(
+        "LIVE_WEB_URLS",
+        "https://www.iba-suk.edu.pk/,https://www.iba-suk.edu.pk/announcements"
+    ).split(",")
+    if u.strip()
+]
+MAX_LIVE_CONTEXT = int(os.getenv("MAX_LIVE_CONTEXT", "3"))
+
+def _format_source(meta: Dict[str, Any]) -> str:
     """
-    contexts: list[str] highest-scoring retrieved chunks
+    Turn metadata into a friendly source string.
     """
-    numbered_ctx = "\n".join(f"{i+1}. {c}" for i, c in enumerate(contexts, start=1))
+    if not meta:
+        return "unknown source"
+    parts = []
+    src_type = meta.get("source")
+    file_name = meta.get("file")
+    url = meta.get("url")
+    heading = meta.get("heading")
+    if src_type:
+        parts.append(str(src_type))
+    if file_name:
+        parts.append(os.path.basename(str(file_name)))
+    if url and not file_name:
+        parts.append(str(url))
+    if heading:
+        parts.append(f"section: {heading}")
+    return " | ".join(parts) if parts else "unknown source"
+
+
+def build_prompt(question: str, contexts: List[Dict[str, Any]]):
+    """
+    contexts: list of dicts with keys document, metadata
+    """
+    entries = []
+    for i, item in enumerate(contexts, start=1):
+        doc = item.get("document", "")
+        meta = item.get("metadata", {}) or {}
+        src = _format_source(meta)
+        entries.append(f"[{i}] {doc}\n(Source: {src})")
+    numbered_ctx = "\n\n".join(entries)
     system_msg = (
-        "You are SibaSol assistant. Use only the provided context to answer.\n"
+        "You are the official SIBAU assistant. Use only the provided context (RAG KB + fresh web/social samples) to answer.\n"
+        "- Prefer the knowledge base; use live web/FB snippets to confirm recency.\n"
+        "- If sources conflict, state the difference and prefer the KB unless recency is clear.\n"
         "- Synthesize across snippets instead of repeating them.\n"
-        "- Be concise and natural (2-6 sentences).\n"
+        "- Be concise and natural (2-6 sentences) and speak like a helpful university representative.\n"
+        "- Do NOT mention the words 'context', 'snippet', or that you are using provided text; just answer directly.\n"
         "- If something important is missing, say what is unknown rather than guessing."
     )
     user_msg = (
@@ -101,31 +147,149 @@ def build_prompt(question, contexts):
         {"role": "user", "content": user_msg},
     ]
 
+def _retrieve(q_emb, top_k: int = 5, fetch_k: int = None):
+    """
+    Retrieve candidates from Chroma with metadata and distances, then sort and deduplicate.
+    """
+    fetch_k = fetch_k or max(top_k * 3, top_k + 2)
+    res = collection.query(
+        query_embeddings=[q_emb],
+        n_results=fetch_k,
+        include=["documents", "metadatas", "distances"],
+    )
+    candidates = []
+    for docs, metas, dists in zip(
+        res.get("documents", []),
+        res.get("metadatas", []),
+        res.get("distances", []),
+    ):
+        for doc, meta, dist in zip(docs, metas, dists):
+            candidates.append(
+                {"document": doc, "metadata": meta or {}, "distance": float(dist)}
+            )
+    # sort by distance (lower = closer for cosine in Chroma)
+    candidates.sort(key=lambda x: x["distance"])
+
+    # Deduplicate identical text to avoid prompt bloat
+    seen_docs = set()
+    unique = []
+    for c in candidates:
+        dtext = c["document"]
+        if dtext in seen_docs:
+            continue
+        seen_docs.add(dtext)
+        unique.append(c)
+        if len(unique) >= top_k:
+            break
+    return unique
+
+
+def _fetch_live_candidates(q_emb, max_items: int = MAX_LIVE_CONTEXT):
+    """
+    Fetch fresh snippets from SIBA website and Facebook, rank by cosine similarity to the query embedding.
+    """
+    if max_items <= 0:
+        return []
+
+    docs = []
+    # target a handful of key pages (announcements / homepage)
+    for url in LIVE_WEB_URLS:
+        docs.extend(scrape_page(url))
+    docs.extend(fetch_facebook_posts())
+
+    texts = []
+    metas = []
+    for d in docs:
+        content = d.get("content", "")
+        if not content or len(content) < 30:
+            continue
+        texts.append(content)
+        metas.append({
+            "source": d.get("source") or "live_web",
+            "url": d.get("url"),
+            "file": d.get("file"),
+            "heading": d.get("heading"),
+            "subheading": d.get("subheading"),
+        })
+
+    if not texts:
+        return []
+
+    embs = embed_texts(texts)
+    q_vec = np.array(q_emb)
+    candidates = []
+
+    for emb, text, meta in zip(embs, texts, metas):
+        e_vec = np.array(emb)
+        denom = (np.linalg.norm(q_vec) * np.linalg.norm(e_vec)) + 1e-9
+        sim = float(np.dot(q_vec, e_vec) / denom)
+        candidates.append({"document": text, "metadata": meta, "sim": sim})
+
+    # sort by similarity (higher better)
+    candidates.sort(key=lambda x: x["sim"], reverse=True)
+
+    # deduplicate text
+    unique = []
+    seen = set()
+    for c in candidates:
+        dtext = c["document"]
+        if dtext in seen:
+            continue
+        seen.add(dtext)
+        unique.append(c)
+        if len(unique) >= max_items:
+            break
+    return unique
+
+
+def _format_references(contexts: List[Dict[str, Any]]) -> str:
+    """
+    Produce a short natural-language sources string.
+    """
+    seen = set()
+    refs = []
+    for c in contexts:
+        ref = _format_source(c.get("metadata", {}))
+        if ref and ref not in seen:
+            refs.append(ref)
+            seen.add(ref)
+    if not refs:
+        return ""
+    if len(refs) == 1:
+        return f"Source: {refs[0]}"
+    return "Sources: " + "; ".join(refs)
+
+
 def generate_answer(question, top_k=5):
     # 1) embed query
     q_emb = embed_text(question)
-    # 2) retrieve
-    res = collection.query(query_embeddings=[q_emb], n_results=top_k)
-    # results structure: {'ids': [...], 'distances': [...], 'documents': [[...]]}
-    docs = []
-    seen = set()
-    for dlist in res.get("documents", []):
-        for d in dlist:
-            if d not in seen:
-                docs.append(d)
-                seen.add(d)
+
+    # 2) retrieve from KB with rerank/dedup
+    kb_contexts = _retrieve(q_emb, top_k=top_k)
+
+    # 3) fetch fresh web/social snippets and rank
+    live_contexts = _fetch_live_candidates(q_emb, max_items=MAX_LIVE_CONTEXT)
+
+    # combine (KB preferred, live appended)
+    contexts = kb_contexts + live_contexts
     # If nothing retrieved, quick message
-    if not docs:
+    if not contexts:
         return "I don't have any information about that in the knowledge base."
 
-    # 3) Build prompt from top pieces
-    messages = build_prompt(question, docs[:top_k])
+    # 4) Build prompt from top pieces
+    messages = build_prompt(question, contexts)
 
-    # 4) Generate via OpenAI
+    # 5) Generate via OpenAI
     resp = client.chat.completions.create(
         model=OPENAI_MODEL,
         messages=messages,
         temperature=0.35,
         max_tokens=320,
     )
-    return resp.choices[0].message.content.strip()
+    answer = resp.choices[0].message.content.strip()
+
+    # Append references in natural language so the user knows where it came from
+    ref_text = _format_references(contexts)
+    if ref_text:
+        return f"{answer}\n\n{ref_text}"
+    return answer

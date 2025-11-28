@@ -44,6 +44,7 @@ from .scraper_facebook import fetch_facebook_posts
 from .chunker import chunk_documents
 from .embeddings import embed_texts
 from .chroma_db import collection, add_in_batches
+import json
 import glob
 import os
 
@@ -54,7 +55,49 @@ UNIVERSITY_URLS = [
     # add other section urls
 ]
 
-def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped"):
+MANIFEST_PATH = os.path.join("data", ".ingest_manifest.json")
+
+def _file_signature(paths):
+    """
+    Build a dict of absolute path -> {mtime, size} for change detection.
+    """
+    sig = {}
+    for p in paths:
+        if not os.path.isfile(p):
+            continue
+        try:
+            st = os.stat(p)
+            sig[os.path.abspath(p)] = {"mtime": st.st_mtime, "size": st.st_size}
+        except OSError:
+            continue
+    return sig
+
+def _current_manifest(pdfs_dir="data/pdfs", send_dir="send_files"):
+    pdfs = glob.glob(os.path.join(pdfs_dir, "*.pdf"))
+    send_pdfs = glob.glob(os.path.join(send_dir, "*.pdf")) if os.path.isdir(send_dir) else []
+    return _file_signature(pdfs + send_pdfs)
+
+def _load_manifest(path=MANIFEST_PATH):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_manifest(manifest, path=MANIFEST_PATH):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+
+def ingest_needed(pdfs_dir="data/pdfs", send_dir="send_files", manifest_path=MANIFEST_PATH):
+    """
+    Returns True if files were added/removed/changed since last manifest snapshot.
+    """
+    current = _current_manifest(pdfs_dir, send_dir)
+    previous = _load_manifest(manifest_path)
+    return current != previous, current
+
+def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped", send_dir="send_files"):
     """
     Full run: scrape website + facebook -> parse PDFs -> chunk -> embed -> store in Chroma
     """
@@ -84,9 +127,8 @@ def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped"):
             print("pdf parse error", p, e)
 
     # optionally also scan send_files
-    send_files_dir = "send_files"
-    if os.path.isdir(send_files_dir):
-        for p in glob.glob(os.path.join(send_files_dir, "*.pdf")):
+    if os.path.isdir(send_dir):
+        for p in glob.glob(os.path.join(send_dir, "*.pdf")):
             try:
                 final_docs.extend(extract_pdf_with_headings(p))
             except Exception as e:
@@ -111,3 +153,26 @@ def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped"):
         metadatas=metadatas,
     )
     print(f"Ingested {len(ids)} chunks into collection.")
+
+
+def ingest_if_changed(pdfs_dir="data/pdfs", send_dir="send_files"):
+    """
+    Run ingest_all only if local PDF files changed since last snapshot.
+    """
+    needed, snapshot = ingest_needed(pdfs_dir, send_dir)
+    if not needed:
+        print("No local data changes detected; skipping ingest.")
+        return False
+
+    ingest_all(pdfs_dir=pdfs_dir, send_dir=send_dir)
+    _save_manifest(snapshot)
+    return True
+
+
+def update_manifest_snapshot(pdfs_dir="data/pdfs", send_dir="send_files"):
+    """
+    Refresh manifest after manual uploads so future startups don't re-ingest unnecessarily.
+    """
+    snapshot = _current_manifest(pdfs_dir, send_dir)
+    _save_manifest(snapshot)
+    return snapshot

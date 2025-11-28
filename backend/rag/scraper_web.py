@@ -65,7 +65,8 @@ def scrape_page(url, session=None):
         return []
 
     soup = BeautifulSoup(r.text, "html.parser")
-    page_title = soup.title.string.strip() if soup.title else None
+    title_node = soup.title.string if soup.title else None
+    page_title = title_node.strip() if title_node else None
 
     docs = []
     cur_h1 = None

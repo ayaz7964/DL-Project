@@ -36,33 +36,7 @@ function renderTextWithBreaks(text) {
 }
 
 // 📚 Enhanced Knowledge Base (KB)
-const kb = [
-  {
-    triggers: ["admission", "admission date", "deadline", "apply"],
-    reply:
-      "Admissions are typically open until **July 31st**. For the exact schedule and application process, please visit our official admissions portal:\n\nhttps://siba.edu.pk/admissions-schedule",
-  },
-  {
-    triggers: ["fee", "fees", "tuition", "cost"],
-    reply:
-      "The annual tuition for undergraduate programs is generally between **PKR 80,000–120,000**. \n\nWe recommend checking the detailed fee structure for your specific program on the university website: \nhttps://siba.edu.pk/fee-structure",
-  },
-  {
-    triggers: ["courses", "programs", "departments"],
-    reply:
-      "Sukkur IBA University offers a variety of programs, including:\n\n* BBA (Business Administration)\n* BS Computer Science\n* BS Accounting & Finance\n* BS Economics\n* BE Electrical Engineering",
-  },
-  {
-    triggers: ["scholarship", "financial aid", "aid"],
-    reply:
-      "We offer several **scholarship and financial aid** options to support our students, including need-based and merit-based programs. \n\nDetails can be found here: https://siba.edu.pk/scholarships-and-aid",
-  },
-  {
-    triggers: ["hello", "hi", "hey", "greetings"],
-    reply:
-      "Hello! 👋 I'm the SIBA Student Assistant. I specialize in answering questions about **admissions, fees, programs, and scholarships**.",
-  },
-];
+
 
 function getReply(msg) {
   const lower = msg.toLowerCase();
@@ -90,6 +64,12 @@ const TypingIndicator = () => (
     </div>
   </div>
 );
+
+
+// hello ayaz hussain working 
+const ayaz = () => {
+  return <div>hello ayaz hussain</div>;
+};
 
 // 💬 Message Bubble Component
 const ChatMessage = ({ m }) => (

@@ -62,35 +62,44 @@
  
 
  # rag/pipeline.py
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
 from .chroma_db import collection
 from .embeddings import embed_text
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-import threading
-import os
 
-# Load Qwen or other model once (CPU or GPU). replace with your HF model id
-MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"  # replace with "Qwen/..." if you installed it
-# For Qwen local usage you must have the model weights; adjust MODEL_NAME accordingly.
+# Load env so OPENAI_API_KEY / OPENAI_MODEL are picked up
+load_dotenv()
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL")  # optional for Azure / custom proxy
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Load tokenizer+model once (this may take time on startup)
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
-generator = pipeline("text-generation", model=model, tokenizer=tokenizer, device=-1)
+# Create client once; raise early if key is missing so the API caller sees a clear error
+if not OPENAI_API_KEY:
+    raise RuntimeError("OPENAI_API_KEY is not set. Add it to backend/.env or your environment.")
+
+client = OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL)
 
 def build_prompt(question, contexts):
     """
     contexts: list[str] highest-scoring retrieved chunks
     """
     numbered_ctx = "\n".join(f"{i+1}. {c}" for i, c in enumerate(contexts, start=1))
-    return (
-        "You are SibaSol assistant. Read the context snippets and craft a clear, helpful answer.\n"
-        "Guidelines:\n"
-        "- Synthesize across snippets; combine details instead of repeating them.\n"
-        "- Use the context to infer missing links when it is reasonable; make the reasoning explicit.\n"
-        "- Reply in natural language (2-6 sentences). Do not just quote the context.\n"
-        "- If key information is missing, say what is unknown instead of guessing.\n\n"
-        f"CONTEXT:\n{numbered_ctx}\n\nQUESTION: {question}\nANSWER:"
+    system_msg = (
+        "You are SibaSol assistant. Use only the provided context to answer.\n"
+        "- Synthesize across snippets instead of repeating them.\n"
+        "- Be concise and natural (2-6 sentences).\n"
+        "- If something important is missing, say what is unknown rather than guessing."
     )
+    user_msg = (
+        f"QUESTION: {question}\n\n"
+        f"CONTEXT:\n{numbered_ctx}\n\n"
+        "Write a helpful answer."
+    )
+    return [
+        {"role": "system", "content": system_msg},
+        {"role": "user", "content": user_msg},
+    ]
 
 def generate_answer(question, top_k=5):
     # 1) embed query
@@ -110,22 +119,13 @@ def generate_answer(question, top_k=5):
         return "I don't have any information about that in the knowledge base."
 
     # 3) Build prompt from top pieces
-    prompt = build_prompt(question, docs[:top_k])
+    messages = build_prompt(question, docs[:top_k])
 
-    # 4) Generate
-    gen_out = generator(
-        prompt,
-        num_return_sequences=1,
-        max_new_tokens=256,
+    # 4) Generate via OpenAI
+    resp = client.chat.completions.create(
+        model=OPENAI_MODEL,
+        messages=messages,
         temperature=0.35,
-        top_p=0.9,
-        do_sample=True,
-        return_full_text=False,
-    )[0]
-    answer = gen_out.get("generated_text", "").strip()
-    if not answer:
-        # fallback in case the pipeline still includes the prompt
-        raw = gen_out.get("generated_text", "") if isinstance(gen_out, dict) else str(gen_out)
-        if "ANSWER:" in raw:
-            return raw.split("ANSWER:")[-1].strip()
-    return answer
+        max_tokens=320,
+    )
+    return resp.choices[0].message.content.strip()

@@ -107,7 +107,8 @@ def generate_answer(question, top_k=5):
     prompt = build_prompt(question, docs[:top_k])
 
     # 4) Generate
-    out = generator(prompt, max_length=300, num_return_sequences=1)[0]["generated_text"]
+    # max_length=300
+    out = generator(prompt, num_return_sequences=1)[0]["generated_text"]
     # the generator returns the full text including prompt; trim if necessary.
     # We can try to return only after 'ANSWER:' occurrence
     if "ANSWER:" in out:

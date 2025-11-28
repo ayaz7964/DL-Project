@@ -30,3 +30,21 @@ collection = chroma_client.get_or_create_collection(
     name=COLLECTION_NAME,
     metadata={"hnsw:space": "cosine"}
 )
+
+# Default batch size for collection.add (Chroma caps batch size ~166)
+DEFAULT_BATCH_SIZE = int(os.getenv("CHROMA_BATCH_SIZE", "100"))
+
+
+def add_in_batches(ids, documents, embeddings, metadatas=None, batch_size=DEFAULT_BATCH_SIZE):
+    """
+    Utility to avoid Chroma's max batch size errors by splitting large writes.
+    """
+    total = len(ids)
+    for start in range(0, total, batch_size):
+        end = start + batch_size
+        collection.add(
+            ids=ids[start:end],
+            documents=documents[start:end],
+            embeddings=embeddings[start:end] if embeddings is not None else None,
+            metadatas=metadatas[start:end] if metadatas is not None else None,
+        )

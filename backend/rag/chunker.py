@@ -16,6 +16,24 @@
 
 # rag/chunker.py
 import uuid
+from typing import Dict, Any
+
+# Chroma only accepts metadata values of type str/int/float/bool.
+# We drop None values and stringify anything else to prevent ingest errors.
+ALLOWED_META_TYPES = (str, int, float, bool)
+
+
+def _clean_metadata(meta: Dict[str, Any]) -> Dict[str, Any]:
+    cleaned = {}
+    for key, value in meta.items():
+        if value is None:
+            continue
+        if isinstance(value, ALLOWED_META_TYPES):
+            cleaned[key] = value
+        else:
+            cleaned[key] = str(value)
+    return cleaned
+
 
 def chunk_text_with_meta(doc, chunk_size=600, overlap=100):
     """
@@ -33,16 +51,17 @@ def chunk_text_with_meta(doc, chunk_size=600, overlap=100):
         end = min(start + chunk_size, length)
         chunk_text = text[start:end].strip()
         if chunk_text:
+            raw_meta = {
+                "heading": doc.get("heading"),
+                "subheading": doc.get("subheading"),
+                "source": doc.get("source") or "unknown",
+                "file": doc.get("file"),
+                "url": doc.get("url"),
+            }
             chunks.append({
                 "id": str(uuid.uuid4()),
                 "document": chunk_text,
-                "metadata": {
-                    "heading": doc.get("heading"),
-                    "subheading": doc.get("subheading"),
-                    "source": doc.get("source"),
-                    "file": doc.get("file"),
-                    "url": doc.get("url")
-                }
+                "metadata": _clean_metadata(raw_meta),
             })
         start = end - overlap  # move with overlap
         if start < 0:
@@ -50,6 +69,7 @@ def chunk_text_with_meta(doc, chunk_size=600, overlap=100):
         if end == length:
             break
     return chunks
+
 
 def chunk_documents(docs, chunk_size=600, overlap=100):
     all_chunks = []

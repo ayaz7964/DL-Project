@@ -43,7 +43,7 @@ from .scraper_web import crawl_and_collect, scrape_page
 from .scraper_facebook import fetch_facebook_posts
 from .chunker import chunk_documents
 from .embeddings import embed_texts
-from .chroma_db import collection
+from .chroma_db import collection, add_in_batches
 import glob
 import os
 
@@ -104,11 +104,10 @@ def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped"):
     ids = [c["id"] for c in chunks]
 
     embs = embed_texts(docs)
-    # upsert (add)
-    collection.add(
+    add_in_batches(
         ids=ids,
         documents=docs,
         embeddings=embs,
-        metadatas=metadatas
+        metadatas=metadatas,
     )
     print(f"Ingested {len(ids)} chunks into collection.")

@@ -1,4 +1,6 @@
 # # uvicorn main:app --reload --port 8000
+    # .\venv\Scripts\activate
+
 # from fastapi import FastAPI, UploadFile, File
 # from pydantic import BaseModel
 # from rag.pipeline import add_pdf_to_db, generate_answer
@@ -121,7 +123,7 @@ from rag.pipeline import generate_answer
 from rag.pdf_loader import extract_pdf_with_headings
 from rag.chunker import chunk_documents
 from rag.embeddings import embed_texts
-from rag.chroma_db import collection
+from rag.chroma_db import collection, add_in_batches
 
 # --- Scheduler ---
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -197,11 +199,11 @@ async def upload_pdf(file: UploadFile = File(...)):
         metas = [c["metadata"] for c in chunks]
         embs = embed_texts(txts)
 
-        collection.add(
+        add_in_batches(
             ids=ids,
             documents=txts,
             embeddings=embs,
-            metadatas=metas
+            metadatas=metas,
         )
 
         return {"message": "PDF uploaded & ingested successfully"}

@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List, Optional
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # RAG modules
@@ -32,8 +33,13 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # ---------------------------------------------------
 # REQUEST MODEL FOR /ask
 # ---------------------------------------------------
+class QueryTurn(BaseModel):
+    role: str
+    text: str
+
 class QueryRequest(BaseModel):
     query: str
+    history: Optional[List[QueryTurn]] = None
 
 
 # ---------------------------------------------------
@@ -105,7 +111,10 @@ async def upload_pdf(file: UploadFile = File(...)):
 # ---------------------------------------------------
 @app.post("/ask")
 async def ask_question(req: QueryRequest):
-    answer = generate_answer(req.query)
+    history = None
+    if req.history:
+        history = [{"role": h.role, "text": h.text} for h in req.history if h.text]
+    answer = generate_answer(req.query, history=history)
     return {"answer": answer}
 
 

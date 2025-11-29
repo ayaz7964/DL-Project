@@ -36,7 +36,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-from urllib.parse import urljoin
+import hashlib
 import urllib3
 
 # Disable SSL warnings because SIBA has misconfigured HTTPS
@@ -68,36 +68,29 @@ def scrape_page(url, session=None):
     title_node = soup.title.string if soup.title else None
     page_title = title_node.strip() if title_node else None
 
-    docs = []
-    cur_h1 = None
-    cur_h2 = None
+    data = []
+    current_h1 = None
+    current_h2 = None
 
-    # iterate meaningful tags in document order
     for tag in soup.find_all(['h1', 'h2', 'h3', 'p', 'li']):
-        text = clean_text(tag.get_text())
-
-        # skip very small text
-        if not text or len(text) < 20:
-            continue
-
-        if tag.name == "h1":
-            cur_h1 = text
-            cur_h2 = None
-
-        elif tag.name == "h2":
-            cur_h2 = text
-
-        else:
-            # h3/p/li all stored as content paragraphs
-            docs.append({
-                "heading": cur_h1 or page_title,
-                "subheading": cur_h2,
+        if tag.name == 'h1':
+            current_h1 = tag.get_text(strip=True)
+            current_h2 = None
+        elif tag.name == 'h2':
+            current_h2 = tag.get_text(strip=True)
+        elif tag.name in ['p', 'li', 'h3']:
+            text = tag.get_text(strip=True)
+            if len(text) < 20:
+                continue
+            data.append({
+                "heading": current_h1 or page_title,
+                "subheading": current_h2,
                 "content": text,
                 "source": "website",
                 "url": url
             })
 
-    return docs
+    return data
 
 
 def crawl_and_collect(start_urls):
@@ -109,4 +102,16 @@ def crawl_and_collect(start_urls):
         result = scrape_page(u)
         all_docs.extend(result)
     return all_docs
+
+
+def hash_docs(docs):
+    """
+    Deterministic hash of scraped docs to detect changes.
+    """
+    m = hashlib.md5()
+    for d in docs:
+        for key in ("heading", "subheading", "content", "url"):
+            val = d.get(key) or ""
+            m.update(val.encode("utf-8", errors="ignore"))
+    return m.hexdigest()
 

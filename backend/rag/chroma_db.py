@@ -35,16 +35,23 @@ collection = chroma_client.get_or_create_collection(
 DEFAULT_BATCH_SIZE = int(os.getenv("CHROMA_BATCH_SIZE", "100"))
 
 
-def add_in_batches(ids, documents, embeddings, metadatas=None, batch_size=DEFAULT_BATCH_SIZE):
+def add_in_batches(ids, documents, embeddings, metadatas=None, batch_size=DEFAULT_BATCH_SIZE, progress=False, upsert=False):
     """
     Utility to avoid Chroma's max batch size errors by splitting large writes.
+    Uses upsert when requested to avoid duplicate-id errors.
     """
     total = len(ids)
     for start in range(0, total, batch_size):
         end = start + batch_size
-        collection.add(
+        payload = dict(
             ids=ids[start:end],
             documents=documents[start:end],
             embeddings=embeddings[start:end] if embeddings is not None else None,
             metadatas=metadatas[start:end] if metadatas is not None else None,
         )
+        if upsert and hasattr(collection, "upsert"):
+            collection.upsert(**payload)
+        else:
+            collection.add(**payload)
+        if progress:
+            print(f"[ingest] added {min(end, total)}/{total} records")

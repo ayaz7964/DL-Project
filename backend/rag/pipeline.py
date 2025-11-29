@@ -117,7 +117,24 @@ def _format_source(meta: Dict[str, Any]) -> str:
     return " | ".join(parts) if parts else "unknown source"
 
 
-def build_prompt(question: str, contexts: List[Dict[str, Any]]):
+def _history_messages(history: List[Dict[str, Any]], limit: int = 10):
+    """
+    Convert a list of {role, text} dicts to OpenAI chat messages, keeping the last N.
+    """
+    if not history:
+        return []
+    trimmed = history[-limit:]
+    msgs = []
+    for h in trimmed:
+        role = h.get("role")
+        txt = h.get("text") or ""
+        if role not in ("user", "assistant") or not txt:
+            continue
+        msgs.append({"role": role, "content": txt})
+    return msgs
+
+
+def build_prompt(question: str, contexts: List[Dict[str, Any]], history: List[Dict[str, Any]] = None):
     """
     contexts: list of dicts with keys document, metadata
     """
@@ -142,16 +159,17 @@ def build_prompt(question: str, contexts: List[Dict[str, Any]]):
         f"CONTEXT:\n{numbered_ctx}\n\n"
         "Write a helpful answer."
     )
-    return [
-        {"role": "system", "content": system_msg},
-        {"role": "user", "content": user_msg},
-    ]
+    messages = [{"role": "system", "content": system_msg}]
+    messages.extend(_history_messages(history or []))
+    messages.append({"role": "user", "content": user_msg})
+    return messages
 
-def _retrieve(q_emb, top_k: int = 5, fetch_k: int = None):
+def _retrieve(q_emb, top_k: int = 5, fetch_k: int = None, max_distance: float = None):
     """
     Retrieve candidates from Chroma with metadata and distances, then sort and deduplicate.
     """
     fetch_k = fetch_k or max(top_k * 3, top_k + 2)
+    max_distance = max_distance if max_distance is not None else 0.4  # cosine distance; lower is closer
     res = collection.query(
         query_embeddings=[q_emb],
         n_results=fetch_k,
@@ -164,8 +182,11 @@ def _retrieve(q_emb, top_k: int = 5, fetch_k: int = None):
         res.get("distances", []),
     ):
         for doc, meta, dist in zip(docs, metas, dists):
+            dval = float(dist)
+            if dval > max_distance:
+                continue
             candidates.append(
-                {"document": doc, "metadata": meta or {}, "distance": float(dist)}
+                {"document": doc, "metadata": meta or {}, "distance": dval}
             )
     # sort by distance (lower = closer for cosine in Chroma)
     candidates.sort(key=lambda x: x["distance"])
@@ -184,7 +205,7 @@ def _retrieve(q_emb, top_k: int = 5, fetch_k: int = None):
     return unique
 
 
-def _fetch_live_candidates(q_emb, max_items: int = MAX_LIVE_CONTEXT):
+def _fetch_live_candidates(q_emb, max_items: int = MAX_LIVE_CONTEXT, min_sim: float = 0.3):
     """
     Fetch fresh snippets from SIBA website and Facebook, rank by cosine similarity to the query embedding.
     """
@@ -223,6 +244,8 @@ def _fetch_live_candidates(q_emb, max_items: int = MAX_LIVE_CONTEXT):
         e_vec = np.array(emb)
         denom = (np.linalg.norm(q_vec) * np.linalg.norm(e_vec)) + 1e-9
         sim = float(np.dot(q_vec, e_vec) / denom)
+        if sim < min_sim:
+            continue
         candidates.append({"document": text, "metadata": meta, "sim": sim})
 
     # sort by similarity (higher better)
@@ -260,24 +283,50 @@ def _format_references(contexts: List[Dict[str, Any]]) -> str:
     return "Sources: " + "; ".join(refs)
 
 
-def generate_answer(question, top_k=5):
+def generate_answer(question, top_k=5, history=None):
     # 1) embed query
     q_emb = embed_text(question)
 
     # 2) retrieve from KB with rerank/dedup
     kb_contexts = _retrieve(q_emb, top_k=top_k)
 
-    # 3) fetch fresh web/social snippets and rank
-    live_contexts = _fetch_live_candidates(q_emb, max_items=MAX_LIVE_CONTEXT)
+    # 3) if KB empty, fetch fresh web/social snippets and rank
+    live_contexts = []
+    if not kb_contexts:
+        live_contexts = _fetch_live_candidates(q_emb, max_items=MAX_LIVE_CONTEXT)
 
-    # combine (KB preferred, live appended)
-    contexts = kb_contexts + live_contexts
-    # If nothing retrieved, quick message
+    # decide contexts: prefer KB; otherwise use live; otherwise none
+    if kb_contexts:
+        contexts = kb_contexts
+    elif live_contexts:
+        contexts = live_contexts
+    else:
+        contexts = []
+
+    # If nothing retrieved, use guarded general response scoped to SIBAU
     if not contexts:
-        return "I don't have any information about that in the knowledge base."
+        fallback_messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are the official SIBAU assistant. Answer only about Sukkur IBA University and its operations. "
+                    "If you do not know something about SIBAU, say you don't have that information. "
+                    "Greet politely and stay on SIBAU topics."
+                ),
+            },
+        ]
+        fallback_messages.extend(_history_messages(history or []))
+        fallback_messages.append({"role": "user", "content": question})
+        resp = client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=fallback_messages,
+            temperature=0.35,
+            max_tokens=200,
+        )
+        return resp.choices[0].message.content.strip()
 
     # 4) Build prompt from top pieces
-    messages = build_prompt(question, contexts)
+    messages = build_prompt(question, contexts, history=history)
 
     # 5) Generate via OpenAI
     resp = client.chat.completions.create(

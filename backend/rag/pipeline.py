@@ -146,13 +146,13 @@ def build_prompt(question: str, contexts: List[Dict[str, Any]], history: List[Di
         entries.append(f"[{i}] {doc}\n(Source: {src})")
     numbered_ctx = "\n\n".join(entries)
     system_msg = (
-        "You are the official SIBAU assistant. Use only the provided context (RAG KB + fresh web/social samples) to answer.\n"
-        "- Prefer the knowledge base; use live web/FB snippets to confirm recency.\n"
-        "- If sources conflict, state the difference and prefer the KB unless recency is clear.\n"
-        "- Synthesize across snippets instead of repeating them.\n"
-        "- Be concise and natural (2-6 sentences) and speak like a helpful university representative.\n"
-        "- Do NOT mention the words 'context', 'snippet', or that you are using provided text; just answer directly.\n"
-        "- If something important is missing, say what is unknown rather than guessing."
+        "You are the official SIBAU assistant. Answer ONLY about Sukkur IBA University (programs, admissions, fees, faculty, labs, facilities, careers, contacts, resources).\n"
+        "- Use the provided context (RAG KB + fresh web samples) and synthesize across them.\n"
+        "- Cite the source naturally (e.g., 'per admissions page' or 'per library site').\n"
+        "- If sources conflict, state the difference and prefer the most recent/official-sounding snippet.\n"
+        "- Give concise, actionable guidance (2-6 sentences). Use short bullets if listing steps helps.\n"
+        "- If key info is missing, say what is unknown and suggest how to proceed (e.g., contact link/office).\n"
+        "- Politely decline off-topic questions (non-SIBAU). Do NOT mention 'context' or 'snippets'; just answer directly."
     )
     user_msg = (
         f"QUESTION: {question}\n\n"
@@ -205,7 +205,7 @@ def _retrieve(q_emb, top_k: int = 5, fetch_k: int = None, max_distance: float = 
     return unique
 
 
-def _fetch_live_candidates(q_emb, max_items: int = MAX_LIVE_CONTEXT, min_sim: float = 0.3):
+def _fetch_live_candidates(q_emb, max_items: int = MAX_LIVE_CONTEXT, min_sim: float = 0.4):
     """
     Fetch fresh snippets from SIBA website and Facebook, rank by cosine similarity to the query embedding.
     """
@@ -215,8 +215,15 @@ def _fetch_live_candidates(q_emb, max_items: int = MAX_LIVE_CONTEXT, min_sim: fl
     docs = []
     # target a handful of key pages (announcements / homepage)
     for url in LIVE_WEB_URLS:
-        docs.extend(scrape_page(url))
-    docs.extend(fetch_facebook_posts())
+        try:
+            scraped = scrape_page(url)
+            if isinstance(scraped, tuple):
+                scraped = scraped[0]
+            if scraped:
+                docs.extend(scraped)
+        except Exception as e:
+            print("live scrape error:", url, e)
+    # docs.extend(fetch_facebook_posts())  # FB disabled
 
     texts = []
     metas = []

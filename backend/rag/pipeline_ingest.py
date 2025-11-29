@@ -1,7 +1,7 @@
 
 # rag/pipeline_ingest.py
 from .pdf_loader import extract_pdf_with_headings
-from .scraper_web import crawl_and_collect, scrape_page, hash_docs
+from .scraper_web import crawl_and_collect, crawl_site, hash_docs
 from .chunker import chunk_documents
 from .embeddings import embed_texts
 from .chroma_db import collection, add_in_batches
@@ -23,7 +23,7 @@ UNIVERSITY_URLS = [
     "https://www.iba-suk.edu.pk/admissions/announcements",
     "https://iba-suk.edu.pk/admissions/sample-papers",
     "http://applyadmission.iba-suk.edu.pk/",
-   
+   "https://www.iba-suk.edu.pk/faculty/all-doctors", 
     "https://www.iba-suk.edu.pk/careers/announcements",
     "https://dob.iba-suk.edu.pk/UndergradPrograms/ContactGen",
     "https://ee.iba-suk.edu.pk/contact/contactus.html",
@@ -101,9 +101,15 @@ def ingest_needed(file_sig, web_hash, web_timestamp, manifest_path=MANIFEST_PATH
     current = {"files": file_sig, "web_hash": web_hash, "web_timestamp": web_timestamp}
     return needed, current, changed_files, web_changed
 
-def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped", send_dir="send_files",
-               university_urls=None, pre_fetched_web=None, include_web=True,
-               file_paths=None):
+def ingest_all(
+    pdfs_dir="data/pdfs",
+    scraped_dir="data/scraped",
+    send_dir="send_files",
+    university_urls=None,
+    pre_fetched_web=None,
+    include_web=True,
+    file_paths=None,
+):
     """
     Full run: scrape website + facebook -> parse PDFs -> chunk -> embed -> store in Chroma.
     Optionally limit to specific file paths and/or skip web if unchanged.
@@ -115,7 +121,7 @@ def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped", send_dir="send_
     web_hash = ""
     if include_web:
         try:
-            web_docs = pre_fetched_web if pre_fetched_web is not None else crawl_and_collect(university_urls)
+            web_docs = pre_fetched_web if pre_fetched_web is not None else crawl_site(university_urls)
             web_hash = hash_docs(web_docs)
             final_docs.extend(web_docs)
             # persist latest web scrape
@@ -196,6 +202,7 @@ def ingest_all(pdfs_dir="data/pdfs", scraped_dir="data/scraped", send_dir="send_
         upsert=True,
     )
     print(f"[ingest] completed: {len(ids)} chunks ingested/updated; collection count now {collection.count()}.")
+    return web_hash
 
 
 def ingest_if_changed(pdfs_dir="data/pdfs", send_dir="send_files", university_urls=None):
@@ -203,6 +210,7 @@ def ingest_if_changed(pdfs_dir="data/pdfs", send_dir="send_files", university_ur
     Run ingest_all only if local files or scraped web content changed since last snapshot.
     """
     university_urls = university_urls or UNIVERSITY_URLS
+    force = os.getenv("FORCE_INGEST", "0") == "1"
 
     # local files signature
     file_sig = _current_manifest(pdfs_dir, send_dir)
@@ -213,7 +221,7 @@ def ingest_if_changed(pdfs_dir="data/pdfs", send_dir="send_files", university_ur
     prev_web_hash = previous.get("web_hash", "")
 
     web_docs = []
-    web_hash = prev_web_hash
+    web_hash = prev_web_hash or ""
     web_timestamp = prev_web_ts
     should_rescrape = True
 
@@ -239,9 +247,13 @@ def ingest_if_changed(pdfs_dir="data/pdfs", send_dir="send_files", university_ur
         web_timestamp = prev_web_ts or cached_ts
 
     needed, snapshot, changed_files, web_changed = ingest_needed(file_sig, web_hash, web_timestamp)
-    if not needed:
+    if not needed and not force:
         print("No data changes detected; skipping ingest.")
         return False
+    if force:
+        print("FORCE_INGEST=1 set; running full ingest regardless of manifest.")
+        changed_files = None  # process all files
+        web_changed = True    # force web scrape
 
     if changed_files:
         print(f"Detected {len(changed_files)} changed/new files; ingesting only those.")
@@ -252,18 +264,18 @@ def ingest_if_changed(pdfs_dir="data/pdfs", send_dir="send_files", university_ur
     else:
         print("Website content unchanged; skipping web scrape.")
 
-    _, final_web_hash = ingest_all(
+    final_web_hash = ingest_all(
         pdfs_dir=pdfs_dir,
         send_dir=send_dir,
         university_urls=university_urls,
         pre_fetched_web=web_docs if web_changed else None,
         include_web=web_changed,
-        file_paths=changed_files if changed_files else None,
+        file_paths=changed_files if changed_files else [],
     )
     snapshot["web_hash"] = final_web_hash or web_hash
     snapshot["web_timestamp"] = web_timestamp
     _save_manifest(snapshot)
-    return True, snapshot["web_hash"]
+    return True
 
 
 def update_manifest_snapshot(pdfs_dir="data/pdfs", send_dir="send_files"):

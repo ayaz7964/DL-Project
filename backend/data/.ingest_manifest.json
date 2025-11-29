@@ -1,234 +1,238 @@
 {
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\AACSB-Achievment-March-7-2024-PDF.pdf": {
-    "mtime": 1764342761.474151,
-    "size": 635960
+  "files": {
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\AACSB-Achievment-March-7-2024-PDF.pdf": {
+      "mtime": 1764342761.474151,
+      "size": 635960
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Annual Report 2021-2022.pdf": {
+      "mtime": 1764342766.5330808,
+      "size": 7442052
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Convocation March 2 2024 PDF.pdf": {
+      "mtime": 1764342766.6620965,
+      "size": 634352
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Course Schema for BBA Program.pdf": {
+      "mtime": 1764342766.7915416,
+      "size": 609558
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Course-schema-BS-Economics.pdf": {
+      "mtime": 1764342767.3826926,
+      "size": 86764
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\CourseSchema_BE_EE.pdf": {
+      "mtime": 1764342767.3098588,
+      "size": 4903916
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\CSE-Course-schema.pdf": {
+      "mtime": 1764342767.4589796,
+      "size": 303287
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Dr Ajmal Sawan Award March 24 2024 PDF.pdf": {
+      "mtime": 1764342767.5378609,
+      "size": 520158
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Employee Handbook -2020-21 (Updated).pdf": {
+      "mtime": 1764342767.6832118,
+      "size": 1304726
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Enrollment-Form.pdf": {
+      "mtime": 1763645239.0,
+      "size": 464495
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\ExaminationsRegulations 2024.pdf": {
+      "mtime": 1764342767.8429036,
+      "size": 1543477
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Florwers Exhibition March 18 2024 PDF.pdf": {
+      "mtime": 1764342767.9400134,
+      "size": 619999
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\fyp_handbook_electricalEngineering.pdf": {
+      "mtime": 1764342768.1063008,
+      "size": 1179663
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\HEC Policy for Students with Disabilities.pdf": {
+      "mtime": 1763645552.0,
+      "size": 8040724
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\HEC-Anti-Drug   Tobacco Commitee-2025.pdf": {
+      "mtime": 1763645511.0,
+      "size": 434383
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\ICBEM 24 March 8 2024 PDF.pdf": {
+      "mtime": 1764342768.260365,
+      "size": 520022
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Kashmir Day Feb 5 2024 PFD.pdf": {
+      "mtime": 1764342768.3880148,
+      "size": 504444
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Business Administration Booklet.pdf": {
+      "mtime": 1764342774.1626453,
+      "size": 10854564
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Computer Science Booklet.pdf": {
+      "mtime": 1764342778.3853076,
+      "size": 11441130
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Education Booklet 2019.pdf": {
+      "mtime": 1764342781.1428907,
+      "size": 13841567
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Mathematics Booklet.pdf": {
+      "mtime": 1764342781.3446114,
+      "size": 1273493
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS_Thesis_guidelines_hanbook 2-converted.pdf": {
+      "mtime": 1764342781.456776,
+      "size": 412131
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Newsletter VOE Vol 09.pdf": {
+      "mtime": 1764342781.6667888,
+      "size": 1466488
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\ORIC Achievment March 27 2024 PDF.pdf": {
+      "mtime": 1764342781.8373344,
+      "size": 624392
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\PhD Program Maths.pdf": {
+      "mtime": 1764342781.9722247,
+      "size": 421293
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Postgraduate-Rules-Sukkur-IBA-University.pdf": {
+      "mtime": 1764342783.6247337,
+      "size": 1167315
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Pre Convocation Feb 29 2024 PDF.pdf": {
+      "mtime": 1764342783.7518065,
+      "size": 619379
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Senate Meeting March 12 2024 PDF.pdf": {
+      "mtime": 1764342783.8411205,
+      "size": 515409
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBA-Student-Handbook-2020-21_Updated.pdf": {
+      "mtime": 1764342784.41726,
+      "size": 6291624
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU Newsletter Vol11 Updated.pdf": {
+      "mtime": 1764342792.4708302,
+      "size": 28352080
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU Newsletter Vol13 Updated.pdf": {
+      "mtime": 1764342797.5041232,
+      "size": 12978301
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU Newsletter Vol14.pdf": {
+      "mtime": 1764342798.0676863,
+      "size": 5396413
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU_Newsletter_Vol10.pdf": {
+      "mtime": 1764342808.0915182,
+      "size": 15439274
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\SJEST Vol 1- Issue II.pdf": {
+      "mtime": 1764342808.3580043,
+      "size": 1703646
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Special Syndicate February 20 2024 PDF.pdf": {
+      "mtime": 1764342808.4708605,
+      "size": 262087
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Updated Prospectus 20-21.pdf": {
+      "mtime": 1764342811.5642736,
+      "size": 18999818
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\VC Media Briefing March 17 2024 PDF.pdf": {
+      "mtime": 1764342811.709494,
+      "size": 565035
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol 1 no 1 2017.pdf": {
+      "mtime": 1764342813.5607495,
+      "size": 3222516
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol 1 no 2 2017.pdf": {
+      "mtime": 1764342813.9111776,
+      "size": 2509706
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol 2 no 1 2018.pdf": {
+      "mtime": 1764342816.1020057,
+      "size": 7409719
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol-1_No-1_2018.pdf": {
+      "mtime": 1764342816.9040244,
+      "size": 7900192
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol-1_No-2_2018.pdf": {
+      "mtime": 1764342817.4593487,
+      "size": 4877351
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol2-No1-2019.pdf": {
+      "mtime": 1764342819.2245588,
+      "size": 3333218
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol2-No2-2019.pdf": {
+      "mtime": 1764342821.408623,
+      "size": 3306760
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol3-No1-2019.pdf": {
+      "mtime": 1764342821.7788422,
+      "size": 3721438
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol3-No1-2020.pdf": {
+      "mtime": 1764342822.2815623,
+      "size": 5657920
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol3-No2-2019.pdf": {
+      "mtime": 1764342825.2090242,
+      "size": 7260346
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol4No2-2020.pdf": {
+      "mtime": 1764342825.7663703,
+      "size": 5047335
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol7-No1-2020.pdf": {
+      "mtime": 1764342826.217005,
+      "size": 4504976
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol7-No2-2020.pdf": {
+      "mtime": 1764342827.929008,
+      "size": 2391586
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume  3 No 1  April 2016.pdf": {
+      "mtime": 1764342828.5031352,
+      "size": 5150877
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 2 Issue 1  April 2015.pdf": {
+      "mtime": 1764342830.281838,
+      "size": 3970615
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 2 No 2  October 2015.pdf": {
+      "mtime": 1764342831.0105827,
+      "size": 6462008
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 3 No 2  July December 2016.pdf": {
+      "mtime": 1764342833.9062307,
+      "size": 6330418
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 4  No 1 January -June 2017.pdf": {
+      "mtime": 1764342834.4561725,
+      "size": 5877437
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 4 No 2 July-December 2017.pdf": {
+      "mtime": 1764342841.9903657,
+      "size": 4450459
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 5 No 2-2018.pdf": {
+      "mtime": 1764342842.479811,
+      "size": 4599626
+    },
+    "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 6 No 2-2019.pdf": {
+      "mtime": 1764342847.3082652,
+      "size": 2637376
+    }
   },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Annual Report 2021-2022.pdf": {
-    "mtime": 1764342766.5330808,
-    "size": 7442052
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Convocation March 2 2024 PDF.pdf": {
-    "mtime": 1764342766.6620965,
-    "size": 634352
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Course Schema for BBA Program.pdf": {
-    "mtime": 1764342766.7915416,
-    "size": 609558
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Course-schema-BS-Economics.pdf": {
-    "mtime": 1764342767.3826926,
-    "size": 86764
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\CourseSchema_BE_EE.pdf": {
-    "mtime": 1764342767.3098588,
-    "size": 4903916
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\CSE-Course-schema.pdf": {
-    "mtime": 1764342767.4589796,
-    "size": 303287
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Dr Ajmal Sawan Award March 24 2024 PDF.pdf": {
-    "mtime": 1764342767.5378609,
-    "size": 520158
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Employee Handbook -2020-21 (Updated).pdf": {
-    "mtime": 1764342767.6832118,
-    "size": 1304726
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Enrollment-Form.pdf": {
-    "mtime": 1763645239.0,
-    "size": 464495
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\ExaminationsRegulations 2024.pdf": {
-    "mtime": 1764342767.8429036,
-    "size": 1543477
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Florwers Exhibition March 18 2024 PDF.pdf": {
-    "mtime": 1764342767.9400134,
-    "size": 619999
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\fyp_handbook_electricalEngineering.pdf": {
-    "mtime": 1764342768.1063008,
-    "size": 1179663
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\HEC Policy for Students with Disabilities.pdf": {
-    "mtime": 1763645552.0,
-    "size": 8040724
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\HEC-Anti-Drug   Tobacco Commitee-2025.pdf": {
-    "mtime": 1763645511.0,
-    "size": 434383
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\ICBEM 24 March 8 2024 PDF.pdf": {
-    "mtime": 1764342768.260365,
-    "size": 520022
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Kashmir Day Feb 5 2024 PFD.pdf": {
-    "mtime": 1764342768.3880148,
-    "size": 504444
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Business Administration Booklet.pdf": {
-    "mtime": 1764342774.1626453,
-    "size": 10854564
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Computer Science Booklet.pdf": {
-    "mtime": 1764342778.3853076,
-    "size": 11441130
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Education Booklet 2019.pdf": {
-    "mtime": 1764342781.1428907,
-    "size": 13841567
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS PhD Mathematics Booklet.pdf": {
-    "mtime": 1764342781.3446114,
-    "size": 1273493
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\MS_Thesis_guidelines_hanbook 2-converted.pdf": {
-    "mtime": 1764342781.456776,
-    "size": 412131
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Newsletter VOE Vol 09.pdf": {
-    "mtime": 1764342781.6667888,
-    "size": 1466488
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\ORIC Achievment March 27 2024 PDF.pdf": {
-    "mtime": 1764342781.8373344,
-    "size": 624392
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\PhD Program Maths.pdf": {
-    "mtime": 1764342781.9722247,
-    "size": 421293
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Postgraduate-Rules-Sukkur-IBA-University.pdf": {
-    "mtime": 1764342783.6247337,
-    "size": 1167315
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Pre Convocation Feb 29 2024 PDF.pdf": {
-    "mtime": 1764342783.7518065,
-    "size": 619379
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Senate Meeting March 12 2024 PDF.pdf": {
-    "mtime": 1764342783.8411205,
-    "size": 515409
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBA-Student-Handbook-2020-21_Updated.pdf": {
-    "mtime": 1764342784.41726,
-    "size": 6291624
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU Newsletter Vol11 Updated.pdf": {
-    "mtime": 1764342792.4708302,
-    "size": 28352080
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU Newsletter Vol13 Updated.pdf": {
-    "mtime": 1764342797.5041232,
-    "size": 12978301
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU Newsletter Vol14.pdf": {
-    "mtime": 1764342798.0676863,
-    "size": 5396413
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\SIBAU_Newsletter_Vol10.pdf": {
-    "mtime": 1764342808.0915182,
-    "size": 15439274
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\SJEST Vol 1- Issue II.pdf": {
-    "mtime": 1764342808.3580043,
-    "size": 1703646
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Special Syndicate February 20 2024 PDF.pdf": {
-    "mtime": 1764342808.4708605,
-    "size": 262087
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Updated Prospectus 20-21.pdf": {
-    "mtime": 1764342811.5642736,
-    "size": 18999818
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\VC Media Briefing March 17 2024 PDF.pdf": {
-    "mtime": 1764342811.709494,
-    "size": 565035
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol 1 no 1 2017.pdf": {
-    "mtime": 1764342813.5607495,
-    "size": 3222516
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol 1 no 2 2017.pdf": {
-    "mtime": 1764342813.9111776,
-    "size": 2509706
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol 2 no 1 2018.pdf": {
-    "mtime": 1764342816.1020057,
-    "size": 7409719
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol-1_No-1_2018.pdf": {
-    "mtime": 1764342816.9040244,
-    "size": 7900192
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\vol-1_No-2_2018.pdf": {
-    "mtime": 1764342817.4593487,
-    "size": 4877351
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol2-No1-2019.pdf": {
-    "mtime": 1764342819.2245588,
-    "size": 3333218
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol2-No2-2019.pdf": {
-    "mtime": 1764342821.408623,
-    "size": 3306760
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol3-No1-2019.pdf": {
-    "mtime": 1764342821.7788422,
-    "size": 3721438
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol3-No1-2020.pdf": {
-    "mtime": 1764342822.2815623,
-    "size": 5657920
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol3-No2-2019.pdf": {
-    "mtime": 1764342825.2090242,
-    "size": 7260346
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol4No2-2020.pdf": {
-    "mtime": 1764342825.7663703,
-    "size": 5047335
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol7-No1-2020.pdf": {
-    "mtime": 1764342826.217005,
-    "size": 4504976
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Vol7-No2-2020.pdf": {
-    "mtime": 1764342827.929008,
-    "size": 2391586
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume  3 No 1  April 2016.pdf": {
-    "mtime": 1764342828.5031352,
-    "size": 5150877
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 2 Issue 1  April 2015.pdf": {
-    "mtime": 1764342830.281838,
-    "size": 3970615
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 2 No 2  October 2015.pdf": {
-    "mtime": 1764342831.0105827,
-    "size": 6462008
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 3 No 2  July December 2016.pdf": {
-    "mtime": 1764342833.9062307,
-    "size": 6330418
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 4  No 1 January -June 2017.pdf": {
-    "mtime": 1764342834.4561725,
-    "size": 5877437
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 4 No 2 July-December 2017.pdf": {
-    "mtime": 1764342841.9903657,
-    "size": 4450459
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 5 No 2-2018.pdf": {
-    "mtime": 1764342842.479811,
-    "size": 4599626
-  },
-  "E:\\DL Project SIBA\\backend\\data\\pdfs\\Volume 6 No 2-2019.pdf": {
-    "mtime": 1764342847.3082652,
-    "size": 2637376
-  }
+  "web_hash": "a7602a3893d54d3437ab9ae507202eb3",
+  "web_timestamp": "2025-11-29T20:23:25.136553"
 }
